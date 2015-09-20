@@ -24,8 +24,7 @@
       "Resources/functions/dump.php"
     ],
     "psr-4": {
-      "Leaf\\Component\\Loger\\": ""
+      "Leaf\\Loger\\": ""
     }
-  },
-  "minimum-stability": "stable"
+  }
 }
