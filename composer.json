@@ -1,0 +1,31 @@
+{
+  "name": "leaf/Leaf-Loger",
+  "version": "0.1.1",
+  "type": "library",
+  "description": "轻量级的日志记录器, 可记录日志内容到你需要的任何handler",
+  "keywords": [
+    "loger",
+    "php"
+  ],
+  "homepage": "https://symfony.com",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "hongshuai dong",
+      "email": "663280439@qq.com",
+      "homepage": "http://www.leafphp.com"
+    }
+  ],
+  "require": {
+    "php": ">=5.4.0"
+  },
+  "autoload": {
+    "files": [
+      "Resources/functions/dump.php"
+    ],
+    "psr-4": {
+      "Leaf\\Component\\Loger\\": ""
+    }
+  },
+  "minimum-stability": "dev"
+}
