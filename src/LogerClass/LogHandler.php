@@ -1,11 +1,16 @@
 <?php
 
-namespace Leaf\Loger;
+declare(strict_types = 1);
+
+namespace Leaf\Loger\LogerClass;
 
 /**
  * Describes log levels
  */
-abstract class LogLevel
+class LogHandler
 {
-    public function handle();
+    public function handle()
+    {
+
+    }
 }

@@ -5,12 +5,35 @@
  * 日志记录器
  */
 
+declare(strict_types = 1);
+
 namespace Leaf\Loger;
 
-use Psr\Log;
+use Leaf\Loger\LogerClass\LogHandler;
+use Leaf\Loger\LogerClass\LogHandlerManager;
 
-class Loger extends AbstractLogger
+class Loger implements \Psr\Log\AbstractLogger
 {
+
+    private $handlerManager = null;
+
+    /**
+     * 构造方法注册,
+     */
+    public function __construct()
+    {
+        $this->init();
+    }
+
+    public function init()
+    {
+        $this->setLogManager(new LogHandlerManager());
+    }
+
+    public function setLogManager(LogHandlerManager $handlerManager)
+    {
+        $this->handlerManager = $handlerManager;
+    }
 
     /**
      * 系统不可用
@@ -19,7 +42,7 @@ class Loger extends AbstractLogger
      * @param array $context
      * @return null
      */
-    public function emergency(string $message, array $context = array())
+    public function emergency(string $message, array $context = [])
     {
         $this->log(LogLevel::EMERGENCY, $message, $context);
     }
@@ -33,7 +56,7 @@ class Loger extends AbstractLogger
      * @param array $context
      * @return null
      */
-    public function alert(string $message, array $context = array())
+    public function alert(string $message, array $context = [])
     {
         $this->log(LogLevel::ALERT, $message, $context);
     }
@@ -47,7 +70,7 @@ class Loger extends AbstractLogger
      * @param array $context
      * @return null
      */
-    public function critical(string $message, array $context = array())
+    public function critical(string $message, array $context = [])
     {
         $this->log(LogLevel::CRITICAL, $message, $context);
     }
@@ -59,7 +82,7 @@ class Loger extends AbstractLogger
      * @param array $context
      * @return null
      */
-    public function error(string $message, array $context = array())
+    public function error(string $message, array $context = [])
     {
         $this->log(LogLevel::ERROR, $message, $context);
     }
@@ -73,7 +96,7 @@ class Loger extends AbstractLogger
      * @param array $context
      * @return null
      */
-    public function warning(string $message, array $context = array())
+    public function warning(string $message, array $context = [])
     {
         $this->log(LogLevel::WARNING, $message, $context);
     }
@@ -85,7 +108,7 @@ class Loger extends AbstractLogger
      * @param array $context
      * @return null
      */
-    public function notice(string $message, array $context = array())
+    public function notice(string $message, array $context = [])
     {
         $this->log(LogLevel::NOTICE, $message, $context);
     }
@@ -99,7 +122,7 @@ class Loger extends AbstractLogger
      * @param array $context
      * @return null
      */
-    public function info(string $message, array $context = array())
+    public function info(string $message, array $context = [])
     {
         $this->log(LogLevel::INFO, $message, $context);
     }
@@ -111,7 +134,7 @@ class Loger extends AbstractLogger
      * @param array $context
      * @return null
      */
-    public function debug(string $message, array $context = array())
+    public function debug(string $message, array $context = [])
     {
         $this->log(LogLevel::DEBUG, $message, $context);
     }
@@ -124,9 +147,22 @@ class Loger extends AbstractLogger
      * @param array $context
      * @return null
      */
-    public function log(string $level, string $message, array $context = array())
+    public function log(string $level, string $message, array $context = [])
     {
-        
+        if (is_object($this->handlerManager) && ($this->handlerManager instanceof LogHandlerManager)) {
+            $this->handlerManager->handle($level, $message, $context);
+        } else {
+            throw new \UnexpectedValueException('logManager needed!');
+        }
+    }
+
+    /**
+     * 添加日志记录器
+     * @param LogHandler $handler
+     */
+    public function addHandler(LogHandler $handler)
+    {
+        $this->handlerManager->addHandler();
     }
 
 }

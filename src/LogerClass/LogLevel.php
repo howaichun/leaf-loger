@@ -1,18 +1,15 @@
 <?php
 
-namespace Leaf\Loger;
+declare(strict_types = 1);
+
+namespace Leaf\Loger\LogerClass;
+
+use \Psr\Log;
 
 /**
- * Describes log levels
+ * Class LogLevel
+ * @package Leaf\Loger
  */
-class LogLevel
+class LogLevel extends Log\LogLevel
 {
-    const EMERGENCY = 'emergency';
-    const ALERT = 'alert';
-    const CRITICAL = 'critical';
-    const ERROR = 'error';
-    const WARNING = 'warning';
-    const NOTICE = 'notice';
-    const INFO = 'info';
-    const DEBUG = 'debug';
 }
