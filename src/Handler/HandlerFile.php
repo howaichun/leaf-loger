@@ -4,18 +4,20 @@ declare(strict_types = 1);
 
 namespace Leaf\Loger\Handler;
 
+use Leaf\Loger\Handler\HandlerInterface;
+
 /**
  * file handler
  * Class HandlerFile
  * @package Leaf\Loger\Handler
  */
-class HandlerFile implements HandlerInterface
+class HandlerFile extends HandlerBase
 {
 
     protected $logContent = '';
     protected $logFile = '';
-    protected $maxFileSize = '20k';
-    protected $maxLogFiles = 1000;
+    protected $maxFileSize = 0; //10 * 1024
+    protected $logMessageFormat = '<timestamp> [-][-][-][<level>][<category>] <message>';
 
     /**
      * HandlerFile constructor.
@@ -43,6 +45,11 @@ class HandlerFile implements HandlerInterface
         $this->registerFileLogShutDown();
     }
 
+    public function setLogMessageFormat(string $format)
+    {
+        $this->logMessageFormat = $format;
+    }
+
     /**
      * register a shutdown function so that we can flush log string to file once
      */
@@ -53,12 +60,45 @@ class HandlerFile implements HandlerInterface
 
     public function flushLog()
     {
-
+        if (!empty($this->logMessage)) {
+            foreach ($this->logMessage as $message) {
+                $searchPattern = [
+                    '<level>',
+                    '<message>',
+                    '<timestamp>',
+                    '<category>',
+                ];
+                $this->logContent .= str_replace($searchPattern, $message) . PHP_EOL;
+            }
+            $this->flushToFile();
+        }
     }
 
-    public function handle(array $record = [])
+    protected function flushToFile()
     {
+        if ($this->maxFileSize === 0) {
+            error_log($this->logContent, $this->logFile);
+        }
+    }
 
+    /**
+     * handle log message
+     * @param string $level
+     * @param string $message
+     * @param array $context
+     */
+    public function handle(string $level, string $message, array $context = [])
+    {
+        if (empty($level) || empty($message)) {
+            throw new \InvalidArgumentException('param error: level or message can\'t be empty');
+        }
+        $logInfo = [
+            'level' => $level,
+            'message' => $message,
+            'timestamp' => $this->getLogTime(),
+            'category' => 'application',
+        ];
+        $this->logMessage[] = $logInfo;
     }
 
 

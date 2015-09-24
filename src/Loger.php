@@ -11,11 +11,12 @@ namespace Leaf\Loger;
 
 use Leaf\Loger\LogerClass\LogHandler;
 use Leaf\Loger\LogerClass\LogHandlerManager;
+use Leaf\Loger\LogerClass\LogLevel;
 
 class Loger implements \Psr\Log\AbstractLogger
 {
 
-    private $handlerManager = null;
+    private static $handlerManager = null;
 
     /**
      * 构造方法注册,
@@ -32,7 +33,12 @@ class Loger implements \Psr\Log\AbstractLogger
 
     public function setLogManager(LogHandlerManager $handlerManager)
     {
-        $this->handlerManager = $handlerManager;
+        static::$handlerManager = $handlerManager;
+    }
+
+    public function getLogManager():LogHandlerManager
+    {
+        return static::$handlerManager;
     }
 
     /**
@@ -149,8 +155,8 @@ class Loger implements \Psr\Log\AbstractLogger
      */
     public function log(string $level, string $message, array $context = [])
     {
-        if (is_object($this->handlerManager) && ($this->handlerManager instanceof LogHandlerManager)) {
-            $this->handlerManager->handle($level, $message, $context);
+        if (is_object(static::getLogManager()) && (static::getLogManager() instanceof LogHandlerManager)) {
+            static::getLogManager()->handle($level, $message, $context);
         } else {
             throw new \UnexpectedValueException('logManager needed!');
         }
@@ -160,9 +166,9 @@ class Loger implements \Psr\Log\AbstractLogger
      * 添加日志记录器
      * @param LogHandler $handler
      */
-    public function addHandler(LogHandler $handler)
+    public function addHandler(string $handlerName, LogHandler $handler)
     {
-        $this->handlerManager->addHandler();
+        static::getLogManager()->addHandler($handlerName, $handler);
     }
 
 }
