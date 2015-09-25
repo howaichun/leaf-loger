@@ -3,42 +3,67 @@
 /**
  * Leaf Loger
  * 日志记录器
+ * 强烈推荐使用[依赖注入方式, 如leaf-di]处理 loger、logHandlerManager、logHandler 三者之间的解耦合
  */
 
 declare(strict_types = 1);
 
 namespace Leaf\Loger;
 
-use Leaf\Loger\LogerClass\LogHandler;
+use Leaf\Loger\Handler\Handler;
 use Leaf\Loger\LogerClass\LogHandlerManager;
 use Leaf\Loger\LogerClass\LogLevel;
 
-class Loger implements \Psr\Log\AbstractLogger
+//use Psr\Log\AbstractLogger;
+//class Loger extends AbstractLogger
+
+class Loger
 {
 
-    private static $handlerManager = null;
+    protected $logHandlerManager = null;
 
-    /**
-     * 构造方法注册,
-     */
     public function __construct()
     {
         $this->init();
     }
 
+    /**
+     * init
+     */
     public function init()
     {
-        $this->setLogManager(new LogHandlerManager());
+        $logHandlerManager = new LogHandlerManager();
+        $this->setLogHandlerManager($logHandlerManager);
     }
 
-    public function setLogManager(LogHandlerManager $handlerManager)
+    /**
+     * set logHandlerManager to this loger
+     * @param LogHandlerManager $logHandlerManager
+     */
+    public function setLogHandlerManager(LogHandlerManager $logHandlerManager)
     {
-        static::$handlerManager = $handlerManager;
+        $this->logHandlerManager = $logHandlerManager;
     }
 
-    public function getLogManager():LogHandlerManager
+    /**
+     * 获取 logHandlerManager
+     * @return LogHandlerManager
+     */
+    public function getLogHandlerManager():LogHandlerManager
     {
-        return static::$handlerManager;
+        return $this->logHandlerManager;
+    }
+
+    /**
+     * 获取日志记录处理器handler
+     * 默认获取全部, 如果需要获取某个日志处理器, 则可以指定logHandlerName的名称
+     * @param string $logHandlerName
+     */
+    public function getSomeLogHandler(string $logHandlerName)
+    {
+        if (empty($logHandlerName) && !is_null($this->logHandlerManager)) {
+            return $this->getLogHandlerManager()->getSomeLogHandler($logHandlerName);
+        }
     }
 
     /**
@@ -155,8 +180,8 @@ class Loger implements \Psr\Log\AbstractLogger
      */
     public function log(string $level, string $message, array $context = [])
     {
-        if (is_object(static::getLogManager()) && (static::getLogManager() instanceof LogHandlerManager)) {
-            static::getLogManager()->handle($level, $message, $context);
+        if (is_object(static::getLogHandlerManager()) && (static::getLogHandlerManager() instanceof LogHandlerManager)) {
+            static::getLogHandlerManager()->handle($level, $message, $context);
         } else {
             throw new \UnexpectedValueException('logManager needed!');
         }
@@ -166,9 +191,9 @@ class Loger implements \Psr\Log\AbstractLogger
      * 添加日志记录器
      * @param LogHandler $handler
      */
-    public function addHandler(string $handlerName, LogHandler $handler)
+    public function addHandler(string $handlerName, Handler $handler)
     {
-        static::getLogManager()->addHandler($handlerName, $handler);
+        static::getLogHandlerManager()->addHandler($handlerName, $handler);
     }
 
 }

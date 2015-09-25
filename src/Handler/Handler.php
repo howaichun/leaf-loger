@@ -8,7 +8,7 @@ namespace Leaf\Loger\Handler;
  * Class HandlerBase
  * @package Leaf\Loger\Handler
  */
-class HandlerBase
+abstract class Handler
 {
 
     protected $logMessage = [];
@@ -21,10 +21,7 @@ class HandlerBase
         'trace' => '',      //traces (array, debug backtrace, contains the application code call stacks)
     ];
 
-    public function handle(string $level, string $message, array $context = [])
-    {
-
-    }
+    abstract public function handle(string $level, string $message, array $context = []);
 
     /**
      * get formated time, Will output something like: 2014-01-01 12:20:24.423421
@@ -32,14 +29,8 @@ class HandlerBase
      * @param int $utimestamp
      * @return bool|string
      */
-    public function getLogTime(string $format = 'Y-m-d H:i:s.u', int $utimestamp = 0)
+    public function getLogTime(string $format = 'Y-m-d H:i:s', int $utimestamp = 0)
     {
-        if (empty($utimestamp)) {
-            $utimestamp = microtime(true);
-        }
-        $timestamp = floor($utimestamp);
-        $milliseconds = round(($utimestamp - $timestamp) * 1000000);
-        $milliseconds = number_format($milliseconds, 6);
-        return date(preg_replace('`(?<!\\\\)u`', $milliseconds, $format), $timestamp);
+        return date($format);
     }
 }

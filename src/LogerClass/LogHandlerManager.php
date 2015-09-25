@@ -4,8 +4,7 @@ declare(strict_types = 1);
 
 namespace Leaf\Loger\LogerClass;
 
-use Leaf\Loger\Loger;
-
+use Leaf\Loger\Handler\Handler;
 
 /**
  * Class LogerManager
@@ -28,7 +27,7 @@ class LogHandlerManager
      * @param string $handlerName
      * @param LogHandler $handler
      */
-    public function addHandler(string $handlerName, Loger $handler)
+    public function addHandler(string $handlerName, Handler $handler)
     {
         if (empty($handlerName) || empty($handler)) {
             throw new \InvalidArgumentException('handlerName or handler can\'t be empty');
@@ -64,6 +63,18 @@ class LogHandlerManager
     {
         foreach ($this->handlers as $handlerObj) {
             $handlerObj->handle($level, $message, $context);
+        }
+    }
+
+    /**
+     * @param string $logHandlerName handlerName like : file, sms, mail etc
+     */
+    public function getSomeLogHandler(string $logHandlerName = '')
+    {
+        if (!empty($logHandlerName)) {
+            return isset($this->handlers[$logHandlerName]) ? $this->handlers[$logHandlerName] : null;
+        } else {
+            throw new \InvalidArgumentException('empty logHandlerName');
         }
     }
 
