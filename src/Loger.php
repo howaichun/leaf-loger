@@ -1,9 +1,8 @@
 <?php
 
 /**
- * Leaf Loger
- * 日志记录器
- * 强烈推荐使用[依赖注入方式, 如leaf-di]处理 loger、logHandlerManager、logHandler 三者之间的解耦合
+ * loger
+ * you are recommend to handle loger,logHandlerManager and logHandler with dependent object such as leaf-di to loose coupling.
  */
 
 declare(strict_types = 1);
@@ -38,6 +37,7 @@ class Loger
 
     /**
      * set logHandlerManager to this loger
+     *
      * @param LogHandlerManager $logHandlerManager
      */
     public function setLogHandlerManager(LogHandlerManager $logHandlerManager)
@@ -46,7 +46,8 @@ class Loger
     }
 
     /**
-     * 获取 logHandlerManager
+     * get the logHandlerManager
+     *
      * @return LogHandlerManager
      */
     public function getLogHandlerManager():LogHandlerManager
@@ -55,8 +56,8 @@ class Loger
     }
 
     /**
-     * 获取日志记录处理器handler
-     * 默认获取全部, 如果需要获取某个日志处理器, 则可以指定logHandlerName的名称
+     * get a log handler with it's name
+     *
      * @param string $logHandlerName
      */
     public function getSomeLogHandler(string $logHandlerName)
@@ -67,7 +68,7 @@ class Loger
     }
 
     /**
-     * 系统不可用
+     * System is unusable.
      *
      * @param string $message
      * @param array $context
@@ -79,9 +80,10 @@ class Loger
     }
 
     /**
-     * **必须**立刻采取行动
+     * Action must be taken immediately.
      *
-     * 例如：在整个网站都垮掉了、数据库不可用了或者其他的情况下，**应该**发送一条警报短信把你叫醒。
+     * Example: Entire website down, database unavailable, etc. This should
+     * trigger the SMS alerts and wake you up.
      *
      * @param string $message
      * @param array $context
@@ -93,9 +95,9 @@ class Loger
     }
 
     /**
-     * 紧急情况
+     * Critical conditions.
      *
-     * 例如：程序组件不可用或者出现非预期的异常。
+     * Example: Application component unavailable, unexpected exception.
      *
      * @param string $message
      * @param array $context
@@ -107,7 +109,8 @@ class Loger
     }
 
     /**
-     * 运行时出现的错误，不需要立刻采取行动，但必须记录下来以备检测。
+     * Runtime errors that do not require immediate action but should typically
+     * be logged and monitored.
      *
      * @param string $message
      * @param array $context
@@ -119,9 +122,10 @@ class Loger
     }
 
     /**
-     * 出现非错误性的异常。
+     * Exceptional occurrences that are not errors.
      *
-     * 例如：使用了被弃用的API、错误地使用了API或者非预想的不必要错误。
+     * Example: Use of deprecated APIs, poor use of an API, undesirable things
+     * that are not necessarily wrong.
      *
      * @param string $message
      * @param array $context
@@ -133,7 +137,7 @@ class Loger
     }
 
     /**
-     * 一般性重要的事件。
+     * Normal but significant events.
      *
      * @param string $message
      * @param array $context
@@ -145,9 +149,9 @@ class Loger
     }
 
     /**
-     * 重要事件
+     * important log
      *
-     * 例如：用户登录和SQL记录。
+     * sush as：login in log and SQL log。
      *
      * @param string $message
      * @param array $context
@@ -159,7 +163,7 @@ class Loger
     }
 
     /**
-     * debug 详情
+     * debug log
      *
      * @param string $message
      * @param array $context
@@ -171,7 +175,7 @@ class Loger
     }
 
     /**
-     * 任意等级的日志记录
+     * log
      *
      * @param mixed $level
      * @param string $message
@@ -188,7 +192,7 @@ class Loger
     }
 
     /**
-     * 添加日志记录器
+     * add a log handler
      * @param LogHandler $handler
      */
     public function addHandler(string $handlerName, Handler $handler)

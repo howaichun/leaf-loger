@@ -24,6 +24,8 @@ class LogHandlerManager
     }
 
     /**
+     * add a log handler
+     *
      * @param string $handlerName
      * @param LogHandler $handler
      */
@@ -36,7 +38,8 @@ class LogHandlerManager
     }
 
     /**
-     * remove log handler
+     * remove a log handler
+     *
      * @param string $handlerName
      * @return bool
      */
@@ -55,6 +58,7 @@ class LogHandlerManager
 
     /**
      * handle log info
+     *
      * @param string $level
      * @param string $message
      * @param array $context
@@ -67,6 +71,8 @@ class LogHandlerManager
     }
 
     /**
+     * get a log handler with it's name, for example: you can a file handler with its handler name such as 'file'
+     *
      * @param string $logHandlerName handlerName like : file, sms, mail etc
      */
     public function getSomeLogHandler(string $logHandlerName = '')

@@ -11,14 +11,18 @@ namespace Leaf\Loger\Handler;
  */
 class HandlerFile extends Handler
 {
-
+    public $fileMode = 0775;
     protected $logContent = '';
     protected $logFile = '';
-    protected $maxFileSize = 0; //文件大小分割标识, 0表示不分割, 10 * 1024 表示以10M来分割文件
+
+    // 10 * 1024 means that you can split files with 10M a file
+    protected $maxFileSize = 0;
+
+    //log message style, you can expand it like this: <timestamp> [<requestid>][<ip>][<>][<level>][<category>] <message>
     protected $logMessageFormat = '<timestamp> [-][-][-][<level>][<category>] <message>';
 
     /**
-     * 文件日志处理器初始化
+     * init
      */
     public function __construct()
     {
@@ -27,7 +31,16 @@ class HandlerFile extends Handler
     }
 
     /**
+     * init actions
+     */
+    public function init()
+    {
+        $this->registerFileLogShutDown();
+    }
+
+    /**
      * set log file
+     *
      * @param string $file
      */
     public function setLogFile(string $file)
@@ -41,7 +54,8 @@ class HandlerFile extends Handler
     }
 
     /**
-     * 设置logFile的时候, 如果logFile目标文件不存在,则创建
+     * create log file if it is not exists
+     *
      * @throws \Exception
      */
     protected function makeLogFile()
@@ -50,7 +64,7 @@ class HandlerFile extends Handler
             if (!empty($this->logFile)) {
                 //create dir and file
                 if (!is_dir($logDir = dirname($this->logFile))) {
-                    mkdir($logDir, 0777, true);
+                    mkdir($logDir, $this->fileMode, true);
                     touch($this->logFile);
                 }
                 if (!is_file($this->logFile)) {
@@ -63,7 +77,8 @@ class HandlerFile extends Handler
     }
 
     /**
-     * 获取日志文件磁盘地址
+     * get the log file you setted before
+     *
      * @return string
      */
     public function getLogFile()
@@ -72,16 +87,9 @@ class HandlerFile extends Handler
     }
 
     /**
-     * 初始化操作
-     */
-    public function init()
-    {
-        $this->registerFileLogShutDown();
-    }
-
-    /**
-     * 设置 日志格式
-     * @param string $format 如: '<timestamp> [-][-][-][<level>][<category>] <message>';
+     * set the log string style
+     *
+     * @param string $format : '<timestamp> [-][-][-][<level>][<category>] <message>';
      */
     public function setLogMessageFormat(string $format)
     {
@@ -89,7 +97,7 @@ class HandlerFile extends Handler
     }
 
     /**
-     * 注册一个shutdown函数, 当程序结束的时候, 将日志一次性刷入文件中
+     * register a shutdown function so that the log string in memory can be flushed to file when process ends
      */
     protected function registerFileLogShutDown()
     {
@@ -97,7 +105,7 @@ class HandlerFile extends Handler
     }
 
     /**
-     * 获取日志内容,并刷入文件中
+     * flush log string
      */
     public function flushLog()
     {
@@ -106,11 +114,14 @@ class HandlerFile extends Handler
                 $this->logContent .= $this->pregLogContent($message) . PHP_EOL;
             }
             $this->flushToFile();
+            $this->logMessage = [];
+            $this->logContent = '';
         }
     }
 
     /**
-     * 根据 $this->logMessageFormat 日志文件格式, 将数组形式的日志内容格式化为字符串内容
+     * recording to the self::logMessageFormat, convert log array to log string
+     *
      * @param array $message
      * @return string
      */
@@ -128,34 +139,13 @@ class HandlerFile extends Handler
     }
 
     /**
-     * 将日志内容写入文件
+     * flush log string to file
      */
     protected function flushToFile()
     {
         if ($this->maxFileSize === 0) {
             error_log($this->logContent, 3, $this->logFile);
         }
-    }
-
-    /**
-     * 处理日志信息, 将所有日志内容, 放入日志内容的数组中
-     * @param string $level
-     * @param string $message
-     * @param array $context
-     */
-    public function handle(string $level, string $message, array $context = [])
-    {
-        if (empty($level) || empty($message)) {
-            throw new \InvalidArgumentException('param error: level or message can\'t be empty');
-        }
-        $logInfo = [
-            'level' => $level,
-            'message' => $message,
-            'timestamp' => $this->getLogTime(),
-            'category' => 'application',
-        ];
-        $logInfo = array_merge($logInfo, $context);
-        $this->logMessage[] = $logInfo;
     }
 
 
