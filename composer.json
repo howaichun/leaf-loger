@@ -1,11 +1,12 @@
 {
   "name": "leaf/leaf-loger",
-  "version": "0.1.1",
+  "version": "0.3.1",
   "type": "library",
   "description": "轻量级的日志记录器, 可记录日志内容到你需要的任何handler",
   "keywords": [
     "loger",
-    "php"
+    "php",
+    "php7"
   ],
   "homepage": "https://www.leafphp.com",
   "license": "GUN",
