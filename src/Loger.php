@@ -1,48 +1,74 @@
 <?php
 
 /**
- * Leaf Loger
- * 日志记录器
+ * loger
+ * you are recommend to handle loger,logHandlerManager and logHandler with dependent object such as leaf-di to loose coupling.
  */
 
 declare(strict_types = 1);
 
 namespace Leaf\Loger;
 
-use Leaf\Loger\LogerClass\LogHandler;
+use Leaf\Loger\Handler\Handler;
 use Leaf\Loger\LogerClass\LogHandlerManager;
 use Leaf\Loger\LogerClass\LogLevel;
 
-class Loger implements \Psr\Log\AbstractLogger
+//use Psr\Log\AbstractLogger;
+//class Loger extends AbstractLogger
+
+class Loger
 {
 
-    private static $handlerManager = null;
+    protected $logHandlerManager = null;
 
-    /**
-     * 构造方法注册,
-     */
     public function __construct()
     {
         $this->init();
     }
 
+    /**
+     * init
+     */
     public function init()
     {
-        $this->setLogManager(new LogHandlerManager());
-    }
-
-    public function setLogManager(LogHandlerManager $handlerManager)
-    {
-        static::$handlerManager = $handlerManager;
-    }
-
-    public function getLogManager():LogHandlerManager
-    {
-        return static::$handlerManager;
+        $logHandlerManager = new LogHandlerManager();
+        $this->setLogHandlerManager($logHandlerManager);
     }
 
     /**
-     * 系统不可用
+     * set logHandlerManager to this loger
+     *
+     * @param LogHandlerManager $logHandlerManager
+     */
+    public function setLogHandlerManager(LogHandlerManager $logHandlerManager)
+    {
+        $this->logHandlerManager = $logHandlerManager;
+    }
+
+    /**
+     * get the logHandlerManager
+     *
+     * @return LogHandlerManager
+     */
+    public function getLogHandlerManager():LogHandlerManager
+    {
+        return $this->logHandlerManager;
+    }
+
+    /**
+     * get a log handler with it's name
+     *
+     * @param string $logHandlerName
+     */
+    public function getSomeLogHandler(string $logHandlerName)
+    {
+        if (empty($logHandlerName) && !is_null($this->logHandlerManager)) {
+            return $this->getLogHandlerManager()->getSomeLogHandler($logHandlerName);
+        }
+    }
+
+    /**
+     * System is unusable.
      *
      * @param string $message
      * @param array $context
@@ -54,9 +80,10 @@ class Loger implements \Psr\Log\AbstractLogger
     }
 
     /**
-     * **必须**立刻采取行动
+     * Action must be taken immediately.
      *
-     * 例如：在整个网站都垮掉了、数据库不可用了或者其他的情况下，**应该**发送一条警报短信把你叫醒。
+     * Example: Entire website down, database unavailable, etc. This should
+     * trigger the SMS alerts and wake you up.
      *
      * @param string $message
      * @param array $context
@@ -68,9 +95,9 @@ class Loger implements \Psr\Log\AbstractLogger
     }
 
     /**
-     * 紧急情况
+     * Critical conditions.
      *
-     * 例如：程序组件不可用或者出现非预期的异常。
+     * Example: Application component unavailable, unexpected exception.
      *
      * @param string $message
      * @param array $context
@@ -82,7 +109,8 @@ class Loger implements \Psr\Log\AbstractLogger
     }
 
     /**
-     * 运行时出现的错误，不需要立刻采取行动，但必须记录下来以备检测。
+     * Runtime errors that do not require immediate action but should typically
+     * be logged and monitored.
      *
      * @param string $message
      * @param array $context
@@ -94,9 +122,10 @@ class Loger implements \Psr\Log\AbstractLogger
     }
 
     /**
-     * 出现非错误性的异常。
+     * Exceptional occurrences that are not errors.
      *
-     * 例如：使用了被弃用的API、错误地使用了API或者非预想的不必要错误。
+     * Example: Use of deprecated APIs, poor use of an API, undesirable things
+     * that are not necessarily wrong.
      *
      * @param string $message
      * @param array $context
@@ -108,7 +137,7 @@ class Loger implements \Psr\Log\AbstractLogger
     }
 
     /**
-     * 一般性重要的事件。
+     * Normal but significant events.
      *
      * @param string $message
      * @param array $context
@@ -120,9 +149,9 @@ class Loger implements \Psr\Log\AbstractLogger
     }
 
     /**
-     * 重要事件
+     * important log
      *
-     * 例如：用户登录和SQL记录。
+     * sush as：login in log and SQL log。
      *
      * @param string $message
      * @param array $context
@@ -134,7 +163,7 @@ class Loger implements \Psr\Log\AbstractLogger
     }
 
     /**
-     * debug 详情
+     * debug log
      *
      * @param string $message
      * @param array $context
@@ -146,7 +175,7 @@ class Loger implements \Psr\Log\AbstractLogger
     }
 
     /**
-     * 任意等级的日志记录
+     * log
      *
      * @param mixed $level
      * @param string $message
@@ -155,20 +184,20 @@ class Loger implements \Psr\Log\AbstractLogger
      */
     public function log(string $level, string $message, array $context = [])
     {
-        if (is_object(static::getLogManager()) && (static::getLogManager() instanceof LogHandlerManager)) {
-            static::getLogManager()->handle($level, $message, $context);
+        if (is_object(static::getLogHandlerManager()) && (static::getLogHandlerManager() instanceof LogHandlerManager)) {
+            static::getLogHandlerManager()->handle($level, $message, $context);
         } else {
             throw new \UnexpectedValueException('logManager needed!');
         }
     }
 
     /**
-     * 添加日志记录器
+     * add a log handler
      * @param LogHandler $handler
      */
-    public function addHandler(string $handlerName, LogHandler $handler)
+    public function addHandler(string $handlerName, Handler $handler)
     {
-        static::getLogManager()->addHandler($handlerName, $handler);
+        static::getLogHandlerManager()->addHandler($handlerName, $handler);
     }
 
 }

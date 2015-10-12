@@ -1,8 +1,13 @@
 <?php
 
 /**
- * Leaf Loger
- * 此 driver 可以由
+ * 这是一个驱动, 介绍了如何使用 leaf-loger, 向文件中写日志, 在实际应用场景中, 你可以自由发挥拓展, 而不是直接把当前这个这个driver
+ * 拿到项目中使用
+ * 另外, 该驱动实现了基本你可能需要的方法, 如日志记录 info, error, 以及获取文件处理器日志记录位置等
+ * 本驱动主要做了3个事情
+ * 1. 实例化loger, 该loger可做成单例模式, 是否单例取决于你, 本driver中, 并未处理成单例
+ * 2. 实例化logHandlerManager, 并交给loger示例, 当然, 倘若你没有实例化这个 logHandlerManage 也可以, 因为loger内部已经做了这个事情
+ * 3. 设置日志处理器, 比如文件处理器, 可设置多个, 设置完成后添加到 loger 中
  */
 
 declare(strict_types = 1);
@@ -13,94 +18,109 @@ use \Psr\Log;
 use \Leaf\Loger\Handler\HandlerFile;
 use \Leaf\Loger\LogerClass\LogHandlerManager;
 use \Leaf\Loger\Loger;
-use \Psr\Log\LoggerTrait;
 
-class LogDriver extends LoggerTrait
+class LogDriver
 {
 
     private static $instance = null;
-    private static $loger = null;
+    private $loger = null;
 
     private function __construct()
     {
-        /**
-         * loger instance
-         */
-        $logManager = new LogHandlerManager();
-        $loger = new Loger();
-        $loger->setLogManager($logManager);
-        static::$loger = $loger;
-        /**
-         * set a handler
-         */
-        $fileHandler = new HandlerFile();
-        $fileHandler->setLogPath('./log.log');
-        /**
-         * add handler to loger
-         */
-        $loger->addHandler($fileHandler);
+        self::init();
     }
 
-    public static function getLoger():Loger
+    private function init()
     {
-        return static::$loger;
+        /**
+         * 实例化loger
+         */
+        $this->loger = new Loger();;
+        /**
+         * 设置日志处理器之文件处理器
+         */
+        $fileHandler = new HandlerFile();
+        /**
+         * 将文件日志处理器添加到loger中
+         */
+        $this->getLoger()->addHandler('file', $fileHandler);
+    }
+
+    /**
+     * 获取日志记录器
+     * @return Loger
+     */
+    public function getLoger():Loger
+    {
+        return $this->loger;
     }
 
     /**
      * 获取单例模式实例化后的loger
      * @return Loger
      */
-    public static function getInstance():Loger
+    public function getInstance(string $instanceName = 'default'):LogDriver
     {
-        if (is_null(self::$instance)) {
-            self::$instance = new self();
+        if (empty(self::$instance[$instanceName])) {
+            self::$instance[$instanceName] = new self();
         }
-        return self::$instance;
+        return self::$instance[$instanceName];
     }
 
     public function emergency(string $message, array $context = [])
     {
-        static::getLoger()->emergency($message, $context);
+        $this->getLoger()->emergency($message, $context);
     }
 
     public function error(string $message, array $context = [])
     {
-        static::getLoger()->error($message, $context);
+        $this->getLoger()->error($message, $context);
     }
 
     public function warning(string $message, array $context = [])
     {
-        static::getLoger()->warning($message, $context);
+        $this->getLoger()->warning($message, $context);
     }
 
     public function alert(string $message, array $context = [])
     {
-        static::getLoger()->alert($message, $context);
+        $this->getLoger()->alert($message, $context);
     }
 
     public function critical(string $message, array $context = [])
     {
-        static::getLoger()->critical($message, $context);
+        $this->getLoger()->critical($message, $context);
     }
 
     public function notice(string $message, array $context = [])
     {
-        static::getLoger()->notice($message, $context);
+        $this->getLoger()->notice($message, $context);
     }
 
     public function info(string $message, array $context = [])
     {
-        static::getLoger()->info($message, $context);
+        $this->getLoger()->info($message, $context);
     }
 
     public function debug(string $message, array $context = [])
     {
-        static::getLoger()->debug($message, $context);
+        $this->getLoger()->debug($message, $context);
     }
 
-    public function log(string $level, string $message, array $context = [])
+    /**
+     * 获取文件处理器日志记录路径
+     */
+    public function getLogFile()
     {
-        static::getLoger()->log($level, $message, $context);
+        $this->getLoger()->getLogHandlerManager()->getSomeLogHandler('file')->getLogFile();
+    }
+
+    /**
+     * 设置文件处理器日志记录路径
+     */
+    public function setLogFile(string $file)
+    {
+        $this->getLoger()->getLogHandlerManager()->getSomeLogHandler('file')->setLogFile($file);
     }
 
 }
