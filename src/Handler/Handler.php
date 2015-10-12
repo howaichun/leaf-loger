@@ -62,7 +62,6 @@ abstract class Handler
 
     /**
      * handle a log info
-     *
      * @param string $level
      * @param string $message
      * @param array $context
